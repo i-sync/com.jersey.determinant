@@ -1,11 +1,14 @@
 package com.jersey.determinant;
 
 import javax.ws.rs.Consumes;
+import javax.ws.rs.FormParam;
 import javax.ws.rs.GET;
 import javax.ws.rs.POST;
 import javax.ws.rs.Path;
 import javax.ws.rs.Produces;
 import javax.ws.rs.core.MediaType;
+
+import com.google.gson.Gson;
 
 @Path("/deter")
 public class DeterResource {
@@ -42,6 +45,20 @@ public class DeterResource {
 		double value = deter(determinant.getArray());
 		determinant.setValue(value);
 		return determinant;
+	}
+	
+	@POST
+	@Path("/simple")
+	@Produces({MediaType.APPLICATION_JSON})
+	@Consumes({MediaType.APPLICATION_FORM_URLENCODED})
+	public Determinant simpleCaleDeter(@FormParam("json") String json)
+	{
+		System.out.println(json);
+		Gson gjson = new Gson();
+		Determinant deter = gjson.fromJson(json, Determinant.class);
+		double value = deter(deter.getArray());
+		deter.setValue(value);
+		return deter; //gjson.toJson(deter);
 	}
 	
 	/*
