@@ -1,0 +1,158 @@
+﻿<html>
+	<head>
+		<meta charset="utf-8">
+		<meta name="viewport" content="width=device-width, initial-scale=1">
+		<title>行列式计算</title>
+		<style>
+			#btnSubmit,#fieldResult 
+			{
+				display:none;
+			}
+		</style>
+		<link rel="stylesheet" href="./css/jquery.mobile-1.4.5.min.css">
+		<script src="./js/jquery-1.11.0.js"></script>
+		<script src="./js/jquery.mobile-1.4.5.min.js"></script>		
+		<script>
+			$(function(){
+				var label=['a','b','c','d','e','f','g'];
+				var n;
+				$("#btnCreate").click(function(){
+					var order = $.trim($("#txtOrder").val());
+					if(order =="")
+					{
+						alert("请输入行列式的阶数...");
+						return true;
+					}
+					n = parseInt(order);
+					if(isNaN(n))
+					{
+						alert("请输入整数!!");
+						return true;
+					}
+					if(n<2||n>5)
+					{
+						alert("请输入一个2~5的整数.");
+						return true;
+					}
+					var divDeter = $("#divDeter");
+					var fieldsetTemplate = $("#fieldsetTemplate");
+					var divTemplate = $("#divTemplate");
+					
+					divDeter.empty();
+					for(var i =0;i<n;i++)
+					{
+						var fieldsetTemp = fieldsetTemplate.clone();
+						fieldsetTemp.addClass("ui-grid-"+label[n-2]);
+						for(var j=0;j<n;j++)
+						{
+							var divTemp = divTemplate.clone();
+							divTemp.addClass("ui-block-"+label[j]);
+							fieldsetTemp.append(divTemp);
+						}
+						divDeter.append(fieldsetTemp);
+					}
+					
+					var fieldResult = $("#fieldResult");
+					var btnSubmit = $("#btnSubmit");
+					var lblResult =$("#lblResult");
+					btnSubmit.show();
+					fieldResult.show();
+					lblResult.text("0.0");
+				});
+				
+				$("#btnSubmit").click(function(){
+					var field = $("#divDeter").children();
+					var array ="[";
+					field.each(function(i,r){
+						var row="[";
+						var divs = $(r).children();
+						divs.each(function(j,c){
+							var val = $.trim($(c).find("input").val());
+							val = val==""?"0":val;
+							row+=val +",";
+						});
+						row = row.slice(0,-1);
+						row+="],";
+						array+=row;
+					});
+					array = array.slice(0,-1);
+					array+="]";
+					//alert(array);
+					var data = "{\"value\":0,\"order\":"+n+",\"array\":"+array+"}";
+					//alert(data);
+					$.ajax({
+						url:"http://www.contacts09.tk/com.jersey.determinant/rest/deter/simple",
+						type:"POST",
+						data:{"json":data},
+						success:function(res)
+						{
+							var divDeter = $("#divDeter");
+							var fieldsetTemplate = $("#fieldsetTemplate");
+							var divTemplate = $("#divTemplate");
+							var lblResult =$("#lblResult");
+							
+							divDeter.empty();
+							for(var i =0;i<n;i++)
+							{
+								var fieldsetTemp = fieldsetTemplate.clone();
+								fieldsetTemp.addClass("ui-grid-"+label[n-2]);
+								for(var j=0;j<n;j++)
+								{
+									var divTemp = divTemplate.clone();
+									divTemp.addClass("ui-block-"+label[j]);
+									divTemp.find("input").val(res.array[i][j]);
+									fieldsetTemp.append(divTemp);
+								}
+								divDeter.append(fieldsetTemp);
+							}
+							lblResult.text(res.value);
+						},
+						error:function(ex)
+						{
+							alert(ex);
+						},
+						dataType:"json"
+					});
+				});
+			});
+		</script>
+	</head>
+	<body>		
+		<div data-role="tabs" id="tabs">
+		  <div data-role="navbar">
+			<ul>
+			  <li><a href="#one" class="ui-btn-active" data-ajax="false">行列式计算</a></li>
+			  <li><a href="#two" data-ajax="false">矩阵计算</a></li>
+			</ul>
+		  </div>
+		  <div id="one" class="ui-body-d ui-content">
+			<div style="display:none;">
+				<!--fieldset id="fieldsetTemplate" class="ui-grid-c"></fieldset>
+				<div id="divTemplate" class="ui-block-a">  <input type="text" value="a"/> </div-->
+				<fieldset id="fieldsetTemplate" ></fieldset>
+				<div id="divTemplate" >  <input type="text"/> </div>
+			</div>
+			<h2>请输入行列式的阶数N：</h2>
+			<input type="text" id="txtOrder"/>
+			<button id="btnCreate">创建</button>
+			<div id="divDeter">
+				
+			</div>
+			<button id="btnSubmit">计算</button>
+			<fieldset id="fieldResult" class="ui-grid-a">
+				<label class="ui-block-a">行列式的值：</label>
+				<label class="ui-block-b" id="lblResult">0.0</label>
+			</fieldset>
+		  </div>
+		  <div id="two">
+			<h2>正在创建中,敬请期待...</h2>
+				<!--fieldset class="ui-grid-c">
+					<div class="ui-block-a">  <input type="text" value="a"/> </div>
+					<div class="ui-block-b"> <input type="text" value="b"/> </div>
+					<div class="ui-block-c">  <input type="text" value="c"/> </div>
+					<div class="ui-block-d"> <input type="text" value="d"/></div> 
+				</fieldset-->
+		  </div>
+		</div>
+	</body>
+</html>
